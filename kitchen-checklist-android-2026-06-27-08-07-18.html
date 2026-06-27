@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kitchen Checklist System</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0f1117;--surface:#181c27;--card:#1e2333;--border:#2a3049;
+  --accent:#00e5a0;--accent2:#ff6b35;--accent3:#4e9eff;--danger:#ff4757;
+  --text:#e8eaf0;--muted:#6b7394;--yes:#00c87a;
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+input,select,textarea{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;font-size:14px;width:100%;font-family:inherit;outline:none;transition:border-color .2s}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+select option{background:#181c27}
+button{cursor:pointer;font-family:inherit;font-size:14px;font-weight:600;border:none;border-radius:8px;padding:10px 20px;transition:all .15s}
+.btn-primary{background:var(--accent);color:#0f1117}
+.btn-primary:hover{filter:brightness(1.1)}
+.btn-danger{background:#ff47571a;color:var(--danger);border:1px solid #ff475733}
+.btn-danger:hover{background:#ff475733}
+.btn-secondary{background:var(--card);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{background:var(--surface)}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid transparent}
+.btn-ghost:hover{background:var(--card);color:var(--text)}
+.btn-sm{padding:6px 14px;font-size:12px}
+.hidden{display:none!important}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+/* Login */
+#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:linear-gradient(135deg,#0f1117 0%,#1a1f35 100%)}
+.login-box{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:44px;width:100%;max-width:420px;box-shadow:0 24px 60px #0006}
+.login-logo{font-size:44px;text-align:center;margin-bottom:10px}
+.login-title{font-size:24px;font-weight:700;text-align:center;margin-bottom:4px}
+.login-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:30px}
+.login-error{background:#ff47571a;border:1px solid #ff475733;color:var(--danger);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px}
+/* App */
+#app{display:none;min-height:100vh}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:50}
+.h-logo{width:36px;height:36px;background:var(--accent);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.h-title{font-size:16px;font-weight:700}
+.h-sub{font-size:12px;color:var(--muted)}
+.h-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.user-pill{background:var(--card);border:1px solid var(--border);padding:6px 14px;border-radius:20px;font-size:13px;display:flex;align-items:center;gap:8px}
+.role-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;text-transform:uppercase}
+.role-admin{background:#4e9eff1a;color:var(--accent3);border:1px solid #4e9eff33}
+.role-employee{background:#00e5a01a;color:var(--accent);border:1px solid #00e5a033}
+.layout{display:flex;min-height:calc(100vh - 61px)}
+aside{width:220px;background:var(--surface);border-right:1px solid var(--border);padding:16px;flex-shrink:0}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:4px;transition:all .15s}
+.nav-item:hover{background:var(--card);color:var(--text)}
+.nav-item.active{background:var(--card);color:var(--accent);border:1px solid var(--border)}
+.nav-icon{font-size:16px;width:20px;text-align:center}
+.content{flex:1;padding:28px;overflow-y:auto;max-height:calc(100vh - 61px)}
+.panel{display:none}.panel.active{display:block}
+.page-title{font-size:20px;font-weight:700;margin-bottom:4px}
+.page-sub{font-size:13px;color:var(--muted);margin-bottom:24px}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:24px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px}
+.stat .sl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.stat .sv{font-size:26px;font-weight:700}
+.table-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.t-header{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--surface)}
+.t-header h3{font-size:14px;font-weight:600}
+table{width:100%;border-collapse:collapse}
+th{padding:12px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);border-bottom:1px solid var(--border)}
+td{padding:12px 16px;font-size:13px;border-bottom:1px solid #1e233344}
+tr:last-child td{border-bottom:none}
+.td-actions{display:flex;gap:6px}
+.tag{display:inline-flex;align-items:center;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;text-transform:uppercase}
+.tag-temp{background:#ff6b351a;color:var(--accent2)}
+.tag-closing{background:#4e9eff1a;color:var(--accent3)}
+.tag-cooking{background:#00e5a01a;color:var(--accent)}
+.tag-custom{background:#a855f71a;color:#c084fc}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:#000a;display:flex;align-items:center;justify-content:center;z-index:200;padding:16px;overflow-y:auto}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:16px;width:100%;max-width:560px;max-height:92vh;overflow-y:auto;margin:auto}
+.modal-lg{max-width:820px}
+.modal-header{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--card);z-index:5}
+.modal-header h2{font-size:16px;font-weight:700}
+.modal-close{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:4px}
+.modal-body{padding:24px}
+.modal-footer{padding:14px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;position:sticky;bottom:0;background:var(--card)}
+
+/* ── SUBMISSION CARDS ── */
+.sub-card{background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:16px;overflow:hidden}
+.sub-head{padding:14px 18px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.sub-head h3{font-size:14px;font-weight:600}
+.sub-body{padding:16px 18px}
+.sub-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.sub-item{display:flex;align-items:flex-start;gap:8px;font-size:13px;padding:6px 0}
+.tick{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-top:1px}
+.tick.yes{background:#00c87a1a;color:var(--yes)}
+.tick.no{background:#ff47571a;color:var(--danger)}
+.sub-label{color:var(--muted);flex:1}
+.progress-wrap{margin-top:12px;border-top:1px solid var(--border);padding-top:12px;display:flex;align-items:center;gap:10px}
+.progress-bar{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;background:var(--accent);border-radius:3px}
+.empty-state{text-align:center;padding:48px 20px;color:var(--muted)}
+.empty-state .es-icon{font-size:40px;margin-bottom:12px}
+
+/* ── FORM BUILDER ── */
+.fb-wrap{display:flex;gap:0;height:calc(100vh - 61px);overflow:hidden}
+.fb-left{width:340px;flex-shrink:0;border-right:1px solid var(--border);overflow-y:auto;background:var(--surface);padding:0}
+.fb-right{flex:1;overflow-y:auto;background:var(--bg);padding:28px}
+.fb-toolbar{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;background:var(--surface);position:sticky;top:0;z-index:10}
+.fb-toolbar h3{font-size:14px;font-weight:700;flex:1}
+.fb-sections{padding:12px}
+
+/* question block in builder */
+.qblock{background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden;cursor:default}
+.qblock-head{padding:12px 14px;display:flex;align-items:center;gap:10px}
+.qblock-icon{font-size:20px;flex-shrink:0}
+.qblock-title{flex:1;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qblock-type{font-size:11px;color:var(--muted);padding:2px 8px;background:var(--surface);border-radius:6px}
+.qblock-actions{display:flex;gap:4px;opacity:0;transition:opacity .15s}
+.qblock:hover .qblock-actions{opacity:1}
+.qblock-actions button{background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;padding:4px 6px;border-radius:6px}
+.qblock-actions button:hover{background:var(--border);color:var(--text)}
+.qblock-desc{padding:0 14px 10px;font-size:12px;color:var(--muted)}
+
+/* section header block */
+.sblock{background:var(--card);border:1px solid var(--accent)33;border-left:3px solid var(--accent);border-radius:10px;margin-bottom:10px;padding:12px 14px;display:flex;align-items:center;gap:10px}
+.sblock-icon{font-size:18px}
+.sblock-text{flex:1}
+.sblock-text .st{font-size:13px;font-weight:700}
+.sblock-text .ss{font-size:12px;color:var(--muted)}
+.sblock-actions{display:flex;gap:4px;opacity:0;transition:opacity .15s}
+.sblock:hover .sblock-actions{opacity:1}
+.sblock-actions button{background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;padding:4px 6px;border-radius:6px}
+.sblock-actions button:hover{background:var(--border);color:var(--text)}
+
+/* add bar */
+.add-bar{display:flex;gap:6px;padding:8px 12px;flex-wrap:wrap}
+.add-btn{background:var(--surface);border:1px dashed var(--border);color:var(--muted);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s}
+.add-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--card)}
+
+/* ── GFORM PREVIEW ── */
+.gform-wrap{max-width:680px;margin:0 auto}
+.gform-cover{border-radius:16px 16px 0 0;overflow:hidden;position:relative;min-height:160px;display:flex;align-items:flex-end}
+.gform-cover-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.gform-cover-overlay{position:absolute;inset:0;background:linear-gradient(to top,#0009 0%,#0003 100%)}
+.gform-cover-bar{position:relative;padding:20px 24px;width:100%}
+.gform-header-card{background:var(--card);border:1px solid var(--border);border-radius:0 0 0 0;padding:28px 28px 20px;border-top:6px solid var(--accent);margin-bottom:16px}
+.gform-title{font-size:26px;font-weight:700;margin-bottom:8px}
+.gform-desc{font-size:14px;color:var(--muted);line-height:1.6}
+.gform-info-row{display:flex;gap:16px;flex-wrap:wrap;margin-top:16px}
+.gform-info-chip{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);background:var(--surface);padding:5px 12px;border-radius:20px;border:1px solid var(--border)}
+
+/* section header in preview */
+.gform-section{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 24px;margin-bottom:12px;display:flex;align-items:center;gap:14px}
+.gform-section-icon{font-size:28px;width:48px;height:48px;background:var(--surface);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.gform-section-text .gst{font-size:16px;font-weight:700}
+.gform-section-text .gss{font-size:13px;color:var(--muted);margin-top:2px}
+
+/* question card in preview */
+.gform-q{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:12px;transition:border-color .2s}
+.gform-q:hover{border-color:#2a3049cc}
+.gform-q-header{display:flex;align-items:flex-start;gap:14px;margin-bottom:14px}
+.gform-q-icon{font-size:22px;width:40px;height:40px;background:var(--surface);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.gform-q-title{font-size:15px;font-weight:600;flex:1;line-height:1.4}
+.gform-q-required{color:var(--danger);margin-left:4px}
+.gform-q-desc{font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.5}
+/* answer widgets */
+.gform-yn{display:flex;gap:10px}
+.gform-yn-btn{flex:1;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:14px;font-weight:600;cursor:pointer;text-align:center;transition:all .2s}
+.gform-yn-btn:hover{border-color:var(--accent);color:var(--accent)}
+.gform-yn-btn.selected-yes{background:#00c87a1a;border-color:var(--yes);color:var(--yes)}
+.gform-yn-btn.selected-no{background:#ff47571a;border-color:var(--danger);color:var(--danger)}
+.gform-options{display:flex;flex-direction:column;gap:8px}
+.gform-option{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:14px;transition:all .2s}
+.gform-option:hover{border-color:var(--accent)}
+.gform-option input{width:18px;height:18px;accent-color:var(--accent);flex-shrink:0}
+.gform-option.selected{border-color:var(--accent);background:#00e5a00a}
+.gform-rating{display:flex;gap:8px}
+.gform-star{font-size:28px;cursor:pointer;transition:transform .1s;color:var(--border)}
+.gform-star:hover,.gform-star.active{color:#fbbf24;transform:scale(1.1)}
+.gform-temp-input{display:flex;align-items:center;gap:10px}
+.gform-temp-input input{max-width:140px}
+.gform-temp-unit{background:var(--surface);border:1px solid var(--border);padding:10px 14px;border-radius:8px;font-size:14px;color:var(--muted)}
+.gform-photo-upload{border:2px dashed var(--border);border-radius:10px;padding:24px;text-align:center;cursor:pointer;transition:border-color .2s;background:var(--surface)}
+.gform-photo-upload:hover{border-color:var(--accent)}
+.gform-photo-preview{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.gform-photo-thumb{width:80px;height:80px;border-radius:8px;object-fit:cover;border:1px solid var(--border)}
+.gform-submit-btn{width:100%;padding:16px;font-size:16px;font-weight:700;background:var(--accent);color:#0f1117;border:none;border-radius:12px;cursor:pointer;margin-top:8px;transition:filter .2s}
+.gform-submit-btn:hover{filter:brightness(1.1)}
+
+/* icon picker */
+.icon-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;max-height:200px;overflow-y:auto;margin-top:8px}
+.icon-cell{font-size:22px;text-align:center;padding:8px;border-radius:8px;cursor:pointer;border:1px solid transparent;transition:all .15s}
+.icon-cell:hover{background:var(--surface);border-color:var(--border)}
+.icon-cell.selected{background:var(--accent)1a;border-color:var(--accent)}
+
+/* image upload in builder */
+.img-upload-zone{border:2px dashed var(--border);border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--surface)}
+.img-upload-zone:hover{border-color:var(--accent);background:var(--card)}
+.img-preview{width:100%;max-height:120px;object-fit:cover;border-radius:8px;margin-top:8px}
+
+/* color theme picker */
+.color-swatches{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.color-swatch{width:32px;height:32px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .15s}
+.color-swatch.selected{border-color:var(--text)}
+.color-swatch:hover{transform:scale(1.1)}
+
+/* backup/export tools */
+.tool-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:20px}
+.tool-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px}
+.tool-icon{font-size:28px;margin-bottom:10px}
+.tool-title{font-size:15px;font-weight:700;margin-bottom:6px}
+.tool-text{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:14px}
+.tool-actions{display:flex;gap:8px;flex-wrap:wrap}
+.note-box{background:#4e9eff12;border:1px solid #4e9eff33;color:var(--text);border-radius:12px;padding:14px 16px;font-size:13px;line-height:1.55;margin-bottom:20px}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">🍽️</div>
+    <div class="login-title">Kitchen Checklist</div>
+    <div class="login-sub">Sign in to continue</div>
+    <div id="login-error" class="login-error hidden"></div>
+    <div class="form-group"><label>Username</label><input id="login-user" type="text" placeholder="Enter username" autocomplete="off"></div>
+    <div class="form-group"><label>Password</label><input id="login-pass" type="password" placeholder="Enter password"></div>
+    <button class="btn-primary" style="width:100%;margin-top:8px;padding:13px" onclick="doLogin()">Sign in</button>
+    <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:18px">Default admin: <b style="color:var(--text)">admin</b> / <b style="color:var(--text)">admin123</b></p>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header>
+    <div class="h-logo">🍽️</div>
+    <div><div class="h-title">Kitchen Checklist</div><div class="h-sub" id="h-role-label">Admin Portal</div></div>
+    <div class="h-right">
+      <div class="user-pill"><span id="h-username">Admin Manager</span><span class="role-badge role-admin" id="h-rolebadge">Admin</span></div>
+      <button class="btn-secondary btn-sm" onclick="doLogout()">Sign out</button>
+    </div>
+  </header>
+  <div class="layout" id="main-layout">
+    <aside id="admin-sidebar" style="display: block;">
+      <div class="nav-item active" onclick="showPanel('dash')" data-panel="dash"><span class="nav-icon">📊</span>Dashboard</div>
+      <div class="nav-item" onclick="showPanel('users')" data-panel="users"><span class="nav-icon">👥</span>Users</div>
+      <div class="nav-item" onclick="showPanel('checklists')" data-panel="checklists"><span class="nav-icon">📋</span>Checklists</div>
+      <div class="nav-item" onclick="showPanel('submissions')" data-panel="submissions"><span class="nav-icon">✅</span>Submissions</div>
+      <div class="nav-item" onclick="showPanel('backup')" data-panel="backup"><span class="nav-icon">💾</span>Backup &amp; Export</div>
+    </aside>
+    <aside id="emp-sidebar" class="hidden">
+      <div class="nav-item" onclick="showPanel('my-dash')" data-panel="my-dash"><span class="nav-icon">🏠</span>My Tasks</div>
+      <div class="nav-item" onclick="showPanel('my-history')" data-panel="my-history"><span class="nav-icon">📜</span>My History</div>
+    </aside>
+    <div class="content" id="main-content">
+      <!-- ADMIN: Dashboard -->
+      <div class="panel active" id="panel-dash">
+        <div class="page-title">Dashboard</div>
+        <div class="page-sub">Overview of kitchen checklist activity</div>
+        <div class="stats-row" id="dash-stats">
+    <div class="stat"><div class="sl">Employees</div><div class="sv" style="color:var(--accent3)">1</div></div>
+    <div class="stat"><div class="sl">Checklists</div><div class="sv" style="color:var(--accent2)">2</div></div>
+    <div class="stat"><div class="sl">Submissions</div><div class="sv" style="color:var(--accent)">0</div></div>
+    <div class="stat"><div class="sl">Today</div><div class="sv">0</div></div></div>
+        <div class="table-wrap">
+          <div class="t-header"><h3>Recent submissions</h3></div>
+          <table><thead><tr><th>Employee</th><th>Checklist</th><th>Date</th><th>Score</th></tr></thead>
+          <tbody id="dash-recent"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px">No submissions yet</td></tr></tbody></table>
+        </div>
+      </div>
+      <!-- ADMIN: Users -->
+      <div class="panel" id="panel-users">
+        <div class="page-title">Users</div>
+        <div class="page-sub">Manage employee accounts</div>
+        <div class="table-wrap">
+          <div class="t-header"><h3>All users</h3><button class="btn-primary btn-sm" onclick="openUserModal()">+ Add user</button></div>
+          <table><thead><tr><th>Name</th><th>Username</th><th>Role</th><th>Actions</th></tr></thead>
+          <tbody id="users-table">
+    <tr>
+      <td>Admin Manager</td>
+      <td><code style="background:var(--surface);padding:2px 8px;border-radius:4px;font-size:12px">admin</code></td>
+      <td><span class="tag tag-closing">admin</span></td>
+      <td><div class="td-actions">
+        <button class="btn-secondary btn-sm" onclick="editUser('u1')">Edit</button>
+        
+      </div></td>
+    </tr>
+    <tr>
+      <td>Anil Kumar</td>
+      <td><code style="background:var(--surface);padding:2px 8px;border-radius:4px;font-size:12px">anil</code></td>
+      <td><span class="tag tag-cooking">employee</span></td>
+      <td><div class="td-actions">
+        <button class="btn-secondary btn-sm" onclick="editUser('u2')">Edit</button>
+        <button class="btn-danger btn-sm" onclick="deleteUser('u2')">Delete</button>
+      </div></td>
+    </tr></tbody></table>
+        </div>
+      </div>
+      <!-- ADMIN: Checklists -->
+      <div class="panel" id="panel-checklists">
+        <div class="page-title">Checklists</div>
+        <div class="page-sub">Build professional Google Form–style checklists</div>
+        <div class="table-wrap">
+          <div class="t-header"><h3>All checklists</h3><button class="btn-primary btn-sm" onclick="openBuilder()">+ Build checklist</button></div>
+          <table><thead><tr><th>Name</th><th>Type</th><th>Questions</th><th>Actions</th></tr></thead>
+          <tbody id="checklists-table">
+    <tr>
+      <td style="font-weight:600">Temperature Log</td>
+      <td><span class="tag tag-temp">temp</span></td>
+      <td>8 questions</td>
+      <td><div class="td-actions">
+        <button class="btn-secondary btn-sm" onclick="openBuilder('cl1')">Edit</button>
+        <button class="btn-danger btn-sm" onclick="deleteChecklist('cl1')">Delete</button>
+      </div></td>
+    </tr>
+    <tr>
+      <td style="font-weight:600">Closing Checklist</td>
+      <td><span class="tag tag-closing">closing</span></td>
+      <td>13 questions</td>
+      <td><div class="td-actions">
+        <button class="btn-secondary btn-sm" onclick="openBuilder('cl2')">Edit</button>
+        <button class="btn-danger btn-sm" onclick="deleteChecklist('cl2')">Delete</button>
+      </div></td>
+    </tr></tbody></table>
+        </div>
+      </div>
+      <!-- ADMIN: Submissions -->
+      <div class="panel" id="panel-submissions">
+        <div class="page-title">All submissions</div>
+        <div class="page-sub">Every employee submission</div>
+        <div id="submissions-list"></div>
+      </div>
+      <!-- ADMIN: Backup & Export -->
+      <div class="panel" id="panel-backup">
+        <div class="page-title">Backup &amp; Export</div>
+        <div class="page-sub">Download the mobile file, save your database, and export reports anytime</div>
+        <div class="note-box">
+          This app stores data in this browser. Use <b>Full database backup</b> regularly and save that file in Gmail or Google Drive. To move data to another device, use <b>Import backup</b> on that device.
+        </div>
+        <div class="tool-grid">
+          <div class="tool-card">
+            <div class="tool-icon">📱</div>
+            <div class="tool-title">Android download</div>
+            <div class="tool-text">Download an offline HTML copy for Android. Open it in Chrome and keep a backup file for your data.</div>
+            <button class="btn-primary btn-sm" onclick="downloadMobileApp('android')">Download Android file</button>
+          </div>
+          <div class="tool-card">
+            <div class="tool-icon">🍎</div>
+            <div class="tool-title">iPhone download</div>
+            <div class="tool-text">Download an offline HTML copy for iPhone/iPad. Open it in Safari or save it to Files.</div>
+            <button class="btn-primary btn-sm" onclick="downloadMobileApp('iphone')">Download iPhone file</button>
+          </div>
+          <div class="tool-card">
+            <div class="tool-icon">📊</div>
+            <div class="tool-title">Excel export</div>
+            <div class="tool-text">Export users, checklists, submissions, and answers into one Excel-readable report.</div>
+            <div class="tool-actions">
+              <button class="btn-primary btn-sm" onclick="exportAllExcel()">Download Excel</button>
+              <button class="btn-secondary btn-sm" onclick="exportSubmissionsCsv()">CSV only</button>
+            </div>
+          </div>
+          <div class="tool-card">
+            <div class="tool-icon">📧</div>
+            <div class="tool-title">Gmail backup</div>
+            <div class="tool-text">Download the full database file, then email it to yourself or upload it to Google Drive.</div>
+            <div class="tool-actions">
+              <button class="btn-primary btn-sm" onclick="downloadGmailBackup()">Download backup</button>
+              <button class="btn-secondary btn-sm" onclick="openGmailBackup()">Open Gmail</button>
+            </div>
+          </div>
+          <div class="tool-card">
+            <div class="tool-icon">📥</div>
+            <div class="tool-title">Import backup</div>
+            <div class="tool-text">Restore users, checklists, and submissions from a database backup file.</div>
+            <button class="btn-secondary btn-sm" onclick="document.getElementById('backup-import').click()">Import backup</button>
+            <input id="backup-import" type="file" accept=".json,application/json" style="display:none" onchange="importBackupFile(event)">
+          </div>
+        </div>
+      </div>
+      <!-- EMPLOYEE: My Tasks -->
+      <div class="panel" id="panel-my-dash">
+        <div class="page-title">My tasks</div>
+        <div class="page-sub">Select a checklist to fill out</div>
+        <div id="emp-checklists-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px"></div>
+      </div>
+      <!-- EMPLOYEE: My History -->
+      <div class="panel" id="panel-my-history">
+        <div class="page-title">My history</div>
+        <div class="page-sub">Your past submissions</div>
+        <div id="my-history-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FORM BUILDER (full screen panel) -->
+<div id="builder-screen" class="hidden" style="position:fixed;inset:0;background:var(--bg);z-index:100;display:flex;flex-direction:column">
+  <div style="background:var(--surface);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0">
+    <button class="btn-ghost btn-sm" onclick="closeBuilder()">← Back</button>
+    <span style="font-size:14px;font-weight:700;flex:1" id="builder-title-label">Form builder</span>
+    <div style="display:flex;gap:8px">
+      <button class="btn-secondary btn-sm" onclick="switchBuilderTab('design')" id="btab-design">✏️ Design</button>
+      <button class="btn-secondary btn-sm" onclick="switchBuilderTab('preview')" id="btab-preview">👁️ Preview</button>
+    </div>
+    <button class="btn-primary btn-sm" onclick="saveBuilderForm()">💾 Save checklist</button>
+  </div>
+  <div style="flex:1;display:flex;overflow:hidden">
+    <!-- LEFT: Controls -->
+    <div class="fb-left" id="builder-design">
+      <div class="fb-toolbar">
+        <h3>Form settings</h3>
+      </div>
+      <div style="padding:14px">
+        <div class="form-group"><label>Checklist title</label><input id="bl-title" placeholder="e.g. Morning Kitchen Opening" oninput="updatePreviewTitle()"></div>
+        <div class="form-group"><label>Description</label><textarea id="bl-desc" rows="2" placeholder="Brief instructions for employees…" oninput="updatePreviewTitle()"></textarea></div>
+        <div class="form-group"><label>Type</label>
+          <select id="bl-type"><option value="custom">Custom</option><option value="temp">Temperature Log</option><option value="closing">Closing Check</option><option value="cooking">Cooking Check</option></select>
+        </div>
+        <div class="form-group">
+          <label>Accent color</label>
+          <div class="color-swatches" id="color-swatches"></div>
+        </div>
+        <div class="form-group">
+          <label>Cover image</label>
+          <div class="img-upload-zone" onclick="document.getElementById('cover-upload').click()">
+            <div style="font-size:24px;margin-bottom:6px">🖼️</div>
+            <div style="font-size:13px;color:var(--muted)">Click to upload cover photo</div>
+            <input type="file" id="cover-upload" accept="image/*" style="display:none" onchange="handleCoverUpload(event)">
+          </div>
+          <img id="cover-preview" class="img-preview hidden">
+          <button id="cover-remove" class="btn-danger btn-sm hidden" style="margin-top:6px;width:100%" onclick="removeCover()">Remove cover</button>
+        </div>
+      </div>
+      <div class="fb-toolbar" style="margin-top:0"><h3>Questions</h3></div>
+      <div id="qlist" style="padding:12px"></div>
+      <div class="add-bar">
+        <div class="add-btn" onclick="addQuestion('yesno')">☑️ Yes/No</div>
+        <div class="add-btn" onclick="addQuestion('rating')">⭐ Rating</div>
+        <div class="add-btn" onclick="addQuestion('temperature')">🌡️ Temp</div>
+        <div class="add-btn" onclick="addQuestion('text')">📝 Text</div>
+        <div class="add-btn" onclick="addQuestion('photo')">📷 Photo</div>
+        <div class="add-btn" onclick="addQuestion('procheck')">🏆 Professional Check</div>
+        <div class="add-btn" onclick="addQuestion('multiple')">🔘 Multiple</div>
+        <div class="add-btn" onclick="addSection()">📂 Section</div>
+      </div>
+    </div>
+    <!-- RIGHT: Live Preview -->
+    <div style="flex:1;overflow-y:auto;background:var(--bg);padding:24px 28px" id="builder-preview">
+      <div class="gform-wrap" id="gform-preview"></div>
+    </div>
+  </div>
+</div>
+
+<!-- FILL FORM (full screen) -->
+<div id="fill-screen" class="hidden" style="position:fixed;inset:0;background:var(--bg);z-index:100;overflow-y:auto">
+  <div style="background:var(--surface);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:5">
+    <button class="btn-ghost btn-sm" onclick="closeFillScreen()">← Back</button>
+    <span style="font-size:14px;font-weight:700;flex:1" id="fill-screen-title"></span>
+    <button class="btn-primary btn-sm" onclick="submitForm()">✅ Submit</button>
+  </div>
+  <div style="padding:24px 28px">
+    <div class="gform-wrap" id="gform-fill"></div>
+  </div>
+</div>
+
+<!-- USER MODAL -->
+<div class="modal-overlay hidden" id="user-modal">
+  <div class="modal">
+    <div class="modal-header"><h2 id="user-modal-title">Add user</h2><button class="modal-close" onclick="closeModal('user-modal')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="um-id">
+      <div class="form-group"><label>Full name</label><input id="um-name" placeholder="e.g. Ravi Kumar"></div>
+      <div class="form-group"><label>Username</label><input id="um-username" placeholder="e.g. ravi.kumar" autocomplete="off"></div>
+      <div class="form-group"><label>Password</label><input id="um-pass" type="password" placeholder="Min 6 characters"></div>
+      <div class="form-group"><label>Role</label><select id="um-role"><option value="employee">Employee</option><option value="admin">Admin / Manager</option></select></div>
+      <div id="um-error" class="login-error hidden"></div>
+    </div>
+    <div class="modal-footer"><button class="btn-secondary" onclick="closeModal('user-modal')">Cancel</button><button class="btn-primary" onclick="saveUser()">Save</button></div>
+  </div>
+</div>
+
+<!-- ICON PICKER MODAL -->
+<div class="modal-overlay hidden" id="icon-modal">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-header"><h2>Pick an icon</h2><button class="modal-close" onclick="closeModal('icon-modal')">✕</button></div>
+    <div class="modal-body">
+      <input id="icon-search" placeholder="Search icons…" oninput="filterIcons(this.value)" style="margin-bottom:12px">
+      <div class="icon-grid" id="icon-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT QUESTION MODAL -->
+<div class="modal-overlay hidden" id="eq-modal">
+  <div class="modal">
+    <div class="modal-header"><h2 id="eq-title">Edit question</h2><button class="modal-close" onclick="closeModal('eq-modal')">✕</button></div>
+    <div class="modal-body" id="eq-body"></div>
+    <div class="modal-footer"><button class="btn-secondary" onclick="closeModal('eq-modal')">Cancel</button><button class="btn-primary" onclick="saveQuestion()">Save</button></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════════════════
+const DB={
+  get(k){try{return JSON.parse(localStorage.getItem('kcs2_'+k))||null}catch{return null}},
+  set(k,v){localStorage.setItem('kcs2_'+k,JSON.stringify(v))},
+  users(){return this.get('users')||[]},
+  checklists(){return this.get('checklists')||[]},
+  submissions(){return this.get('submissions')||[]}
+};
+
+function init(){
+  if(!DB.users().length){
+    DB.set('users',[
+      {id:'u1',name:'Admin Manager',username:'admin',password:'admin123',role:'admin'},
+      {id:'u2',name:'Anil Kumar',username:'anil',password:'anil123',role:'employee'}
+    ]);
+  }
+  if(!DB.checklists().length){
+    DB.set('checklists',[
+      {id:'cl1',name:'Temperature Log',type:'temp',desc:'Record chiller and freezer temperatures every shift.',color:'#4e9eff',cover:'',blocks:[
+        {kind:'section',id:'s1',icon:'🌡️',title:'Storage Units',desc:'Check all refrigeration units'},
+        {kind:'question',id:'q1',icon:'❄️',label:'Is the chiller temperature within 0°C–5°C?',desc:'Check the digital display on the unit',type:'yesno',required:true,options:[]},
+        {kind:'question',id:'q2',icon:'🌡️',label:'Current chiller temperature',desc:'Record exact reading',type:'temperature',required:true,options:[]},
+        {kind:'question',id:'q3',icon:'🚪',label:'Door seal in good condition?',desc:'Check for cracks or gaps',type:'yesno',required:true,options:[]},
+        {kind:'question',id:'q4',icon:'💨',label:'Cooling working properly?',desc:'Listen for fan and check airflow',type:'yesno',required:true,options:[]},
+        {kind:'section',id:'s2',icon:'📦',title:'Food Storage',desc:'Verify food safety practices'},
+        {kind:'question',id:'q5',icon:'🏷️',label:'Food properly covered and labeled?',desc:'All containers must have labels with date and content',type:'yesno',required:true,options:[]},
+        {kind:'question',id:'q6',icon:'📅',label:'FIFO being followed?',desc:'First In First Out – oldest items at front',type:'yesno',required:true,options:[]},
+        {kind:'question',id:'q7',icon:'📸',label:'Upload photo of storage unit',desc:'Take a clear photo showing temperature display',type:'photo',required:false,options:[]},
+        {kind:'question',id:'q8',icon:'📝',label:'Any remarks or issues?',desc:'',type:'text',required:false,options:[]}
+      ]},
+      {id:'cl2',name:'Closing Checklist',type:'closing',desc:'End-of-shift kitchen closing procedure. All items must be completed before leaving.',color:'#00e5a0',cover:'',blocks:[
+        {kind:'section',id:'s1',icon:'🧹',title:'Cleaning',desc:'All surfaces and equipment must be cleaned'},
+        {kind:'question',id:'q1',icon:'🧽',label:'Work tables cleaned and sanitized?',desc:'',type:'yesno',required:true,options:[]},
+        {kind:'question',id:'q2',icon:'🍳',label:'Cooking equipment cleaned?',desc:'',type:'yesno',required:true,options:[]},
+        {kind:'question',id:'q3',icon:'🔥',label:'Gas range cleaned?',desc:'',type:'yesno',required:true,options:[]},
+        {kind:'question',id:'q4',icon:'🍚',label:'Rice cooker / steamer cleaned?',desc:'',type:'yesno',required:true,options:[]},
+        {kind:'question',id:'q5',icon:'🪣',label:'All sinks cleaned?',desc:'',type:'yesno',required:true,options:[]},
+        {kind:'question',id:'q6',icon:'🚰',label:'Floor cleaned and mopped?',desc:'',type:'yesno',required:true,options:[]},
+        {kind:'section',id:'s2',icon:'🔒',title:'Safety & Security',desc:''},
+        {kind:'question',id:'q7',icon:'🔥',label:'Gas valve OFF?',desc:'',type:'yesno',required:true,options:[]},
+        {kind:'question',id:'q8',icon:'🚰',label:'Water taps closed?',desc:'',type:'yesno',required:true,options:[]},
+        {kind:'question',id:'q9',icon:'🗑️',label:'Dustbins emptied?',desc:'',type:'yesno',required:true,options:[]},
+        {kind:'question',id:'q10',icon:'🐭',label:'Any pest activity observed?',desc:'',type:'yesno',required:true,options:[]},
+        {kind:'question',id:'q11',icon:'🚨',label:'Emergency exit clear?',desc:'',type:'yesno',required:true,options:[]},
+        {kind:'question',id:'q12',icon:'⭐',label:'Overall shift cleanliness rating',desc:'Rate the overall cleanliness of the kitchen',type:'rating',required:false,options:[]},
+        {kind:'question',id:'q13',icon:'📝',label:'Remarks or issues',desc:'',type:'text',required:false,options:[]}
+      ]}
+    ]);
+  }
+}
+init();
+
+// ══════════════════════════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════════════════════════
+let currentUser=null;
+function doLogin(){
+  const u=document.getElementById('login-user').value.trim();
+  const p=document.getElementById('login-pass').value;
+  const err=document.getElementById('login-error');
+  const found=DB.users().find(x=>x.username===u&&x.password===p);
+  if(!found){err.textContent='Incorrect username or password.';err.classList.remove('hidden');return}
+  err.classList.add('hidden');
+  currentUser=found;
+  startApp();
+}
+document.getElementById('login-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+document.getElementById('login-user').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+
+function doLogout(){
+  currentUser=null;
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('login-user').value='';
+  document.getElementById('login-pass').value='';
+}
+
+function startApp(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('h-username').textContent=currentUser.name;
+  const isAdmin=currentUser.role==='admin';
+  document.getElementById('h-rolebadge').textContent=isAdmin?'Admin':'Employee';
+  document.getElementById('h-rolebadge').className='role-badge '+(isAdmin?'role-admin':'role-employee');
+  document.getElementById('h-role-label').textContent=isAdmin?'Admin Portal':'Employee Portal';
+  document.getElementById('admin-sidebar').style.display=isAdmin?'block':'none';
+  document.getElementById('emp-sidebar').classList.toggle('hidden',isAdmin);
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(isAdmin){document.getElementById('panel-dash').classList.add('active');document.querySelector('[data-panel="dash"]').classList.add('active');renderDash();renderUsers();renderChecklists();}
+  else{document.getElementById('panel-my-dash').classList.add('active');document.querySelector('[data-panel="my-dash"]').classList.add('active');renderEmpDash();}
+}
+
+// ══════════════════════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════════════════════
+function showPanel(name){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  document.querySelector('[data-panel="'+name+'"]').classList.add('active');
+  if(name==='dash')renderDash();
+  if(name==='users')renderUsers();
+  if(name==='checklists')renderChecklists();
+  if(name==='submissions')renderAdminSubmissions();
+  if(name==='backup')renderBackupSummary();
+  if(name==='my-dash')renderEmpDash();
+  if(name==='my-history')renderMyHistory();
+}
+function openModal(id){document.getElementById(id).classList.remove('hidden')}
+function closeModal(id){document.getElementById(id).classList.add('hidden')}
+
+// ══════════════════════════════════════════════════════════════
+// BACKUP, MOBILE DOWNLOAD, EXPORT
+// ══════════════════════════════════════════════════════════════
+function backupData(){
+  return {
+    app:'Kitchen Checklist System',
+    exportedAt:new Date().toISOString(),
+    version:2,
+    users:DB.users(),
+    checklists:DB.checklists(),
+    submissions:DB.submissions()
+  };
+}
+function safeFileDate(){
+  return new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
+}
+function downloadBlob(filename,content,type){
+  const blob=new Blob([content],{type});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function downloadMobileApp(platform){
+  const clone=document.documentElement.cloneNode(true);
+  const login=clone.querySelector('#login-screen');
+  const app=clone.querySelector('#app');
+  if(login)login.removeAttribute('style');
+  if(app)app.removeAttribute('style');
+  clone.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  const dash=clone.querySelector('#panel-dash');if(dash)dash.classList.add('active');
+  clone.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const dashNav=clone.querySelector('[data-panel="dash"]');if(dashNav)dashNav.classList.add('active');
+  const html='<!DOCTYPE html>\n'+clone.outerHTML;
+  downloadBlob(`kitchen-checklist-${platform}-${safeFileDate()}.html`,html,'text/html;charset=utf-8');
+  alert(platform==='android'
+    ? 'Android file downloaded. Send it to your phone and open it in Chrome. Use Backup & Export to move data.'
+    : 'iPhone file downloaded. Send it to your iPhone and open it in Safari or Files. Use Backup & Export to move data.');
+}
+function downloadGmailBackup(){
+  downloadBlob(`kitchen-checklist-database-backup-${safeFileDate()}.json`,JSON.stringify(backupData(),null,2),'application/json;charset=utf-8');
+}
+function openGmailBackup(){
+  downloadGmailBackup();
+  const subject=encodeURIComponent('Kitchen Checklist database backup');
+  const body=encodeURIComponent('Attach the downloaded kitchen-checklist database backup JSON file to this email, or upload it to Google Drive. To restore later, open the app and use Backup & Export > Import backup.');
+  window.open(`https://mail.google.com/mail/?view=cm&fs=1&su=${subject}&body=${body}`,'_blank');
+}
+function escapeCsv(v){
+  const s=String(v??'').replace(/\r?\n/g,' ');
+  return /[",]/.test(s)?`"${s.replace(/"/g,'""')}"`:s;
+}
+function escapeHtml(v){
+  return String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+function submissionRows(){
+  const rows=[];
+  DB.submissions().forEach(s=>{
+    const answers=s.answers||{};
+    const keys=Object.keys(answers);
+    if(!keys.length){
+      rows.push({id:s.id,date:s.date,time:s.time,shift:s.shift,user:s.userName,checklist:s.clName,type:s.clType,question:'',answer:'',answerType:'',score:s.score,total:s.total,remarks:s.remarks});
+    }
+    keys.forEach(k=>{
+      const a=answers[k]||{};
+      rows.push({id:s.id,date:s.date,time:s.time,shift:s.shift,user:s.userName,checklist:s.clName,type:s.clType,question:k,answer:a.value??'',answerType:a.type||'',score:s.score,total:s.total,remarks:s.remarks});
+    });
+  });
+  return rows;
+}
+function exportSubmissionsCsv(){
+  const headers=['Submission ID','Date','Time','Shift','Employee','Checklist','Checklist Type','Question','Answer','Answer Type','Score','Total','Remarks'];
+  const csv=[headers.map(escapeCsv).join(',')].concat(submissionRows().map(r=>[
+    r.id,r.date,r.time,r.shift,r.user,r.checklist,r.type,r.question,r.answer,r.answerType,r.score,r.total,r.remarks
+  ].map(escapeCsv).join(','))).join('\n');
+  downloadBlob(`kitchen-checklist-submissions-${safeFileDate()}.csv`,csv,'text/csv;charset=utf-8');
+}
+function tableHtml(title,headers,rows){
+  return `<h2>${escapeHtml(title)}</h2><table border="1"><thead><tr>${headers.map(h=>`<th>${escapeHtml(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(row=>`<tr>${row.map(c=>`<td>${escapeHtml(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+}
+function exportAllExcel(){
+  const users=DB.users().map(u=>[u.id,u.name,u.username,u.role]);
+  const checklists=DB.checklists().map(c=>[c.id,c.name,c.type,c.desc||'',(c.blocks||[]).filter(b=>b.kind==='question').length]);
+  const submissions=DB.submissions().map(s=>[s.id,s.date,s.time,s.shift||'',s.userName,s.clName,s.clType,s.score,s.total,s.remarks||'']);
+  const answers=submissionRows().map(r=>[r.id,r.date,r.user,r.checklist,r.question,r.answer,r.answerType,r.score,r.total,r.remarks]);
+  const html=`<html><head><meta charset="UTF-8"></head><body>
+    ${tableHtml('Users',['ID','Name','Username','Role'],users)}
+    ${tableHtml('Checklists',['ID','Name','Type','Description','Questions'],checklists)}
+    ${tableHtml('Submissions',['ID','Date','Time','Shift','Employee','Checklist','Type','Score','Total','Remarks'],submissions)}
+    ${tableHtml('Answers',['Submission ID','Date','Employee','Checklist','Question','Answer','Answer Type','Score','Total','Remarks'],answers)}
+  </body></html>`;
+  downloadBlob(`kitchen-checklist-all-data-${safeFileDate()}.xls`,html,'application/vnd.ms-excel;charset=utf-8');
+}
+function importBackupFile(event){
+  const file=event.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const data=JSON.parse(ev.target.result);
+      if(!Array.isArray(data.users)||!Array.isArray(data.checklists)||!Array.isArray(data.submissions))throw new Error('Invalid backup');
+      if(!confirm('Import this backup? It will replace users, checklists, and submissions on this browser.'))return;
+      DB.set('users',data.users);DB.set('checklists',data.checklists);DB.set('submissions',data.submissions);
+      alert('Backup imported successfully. Please sign in again if needed.');
+      doLogout();
+    }catch(e){alert('Could not import this backup file. Please choose a valid Kitchen Checklist backup.');}
+    event.target.value='';
+  };
+  reader.readAsText(file);
+}
+function renderBackupSummary(){
+  // Reserved for future summary widgets; keeps navigation refresh behavior consistent.
+}
+
+// ══════════════════════════════════════════════════════════════
+// USERS
+// ══════════════════════════════════════════════════════════════
+function renderUsers(){
+  const users=DB.users();
+  document.getElementById('users-table').innerHTML=users.map(u=>`
+    <tr>
+      <td>${u.name}</td>
+      <td><code style="background:var(--surface);padding:2px 8px;border-radius:4px;font-size:12px">${u.username}</code></td>
+      <td><span class="tag ${u.role==='admin'?'tag-closing':'tag-cooking'}">${u.role}</span></td>
+      <td><div class="td-actions">
+        <button class="btn-secondary btn-sm" onclick="editUser('${u.id}')">Edit</button>
+        ${u.id!=='u1'?`<button class="btn-danger btn-sm" onclick="deleteUser('${u.id}')">Delete</button>`:''}
+      </div></td>
+    </tr>`).join('');
+}
+function openUserModal(id){
+  ['um-id','um-name','um-username','um-pass'].forEach(x=>document.getElementById(x).value='');
+  document.getElementById('um-role').value='employee';
+  document.getElementById('um-error').classList.add('hidden');
+  document.getElementById('user-modal-title').textContent='Add user';
+  if(id){const u=DB.users().find(x=>x.id===id);if(!u)return;document.getElementById('um-id').value=u.id;document.getElementById('um-name').value=u.name;document.getElementById('um-username').value=u.username;document.getElementById('um-pass').value=u.password;document.getElementById('um-role').value=u.role;document.getElementById('user-modal-title').textContent='Edit user';}
+  openModal('user-modal');
+}
+function editUser(id){openUserModal(id)}
+function saveUser(){
+  const id=document.getElementById('um-id').value;
+  const name=document.getElementById('um-name').value.trim();
+  const username=document.getElementById('um-username').value.trim();
+  const pass=document.getElementById('um-pass').value;
+  const role=document.getElementById('um-role').value;
+  const err=document.getElementById('um-error');
+  if(!name||!username||!pass){err.textContent='All fields required.';err.classList.remove('hidden');return}
+  if(pass.length<6){err.textContent='Password must be at least 6 characters.';err.classList.remove('hidden');return}
+  const users=DB.users();
+  if(users.find(x=>x.username===username&&x.id!==id)){err.textContent='Username taken.';err.classList.remove('hidden');return}
+  if(id){const i=users.findIndex(x=>x.id===id);users[i]={...users[i],name,username,password:pass,role};}
+  else users.push({id:'u'+Date.now(),name,username,password:pass,role});
+  DB.set('users',users);closeModal('user-modal');renderUsers();
+}
+function deleteUser(id){if(!confirm('Delete this user?'))return;DB.set('users',DB.users().filter(u=>u.id!==id));renderUsers();}
+
+// ══════════════════════════════════════════════════════════════
+// CHECKLISTS LIST
+// ══════════════════════════════════════════════════════════════
+function typeTag(type){const m={temp:'tag-temp',closing:'tag-closing',cooking:'tag-cooking',custom:'tag-custom'};return`<span class="tag ${m[type]||'tag-custom'}">${type}</span>`}
+function renderChecklists(){
+  const cls=DB.checklists();
+  if(!cls.length){document.getElementById('checklists-table').innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px">No checklists yet</td></tr>';return}
+  document.getElementById('checklists-table').innerHTML=cls.map(c=>`
+    <tr>
+      <td style="font-weight:600">${c.name}</td>
+      <td>${typeTag(c.type)}</td>
+      <td>${(c.blocks||[]).filter(b=>b.kind==='question').length} questions</td>
+      <td><div class="td-actions">
+        <button class="btn-secondary btn-sm" onclick="openBuilder('${c.id}')">Edit</button>
+        <button class="btn-danger btn-sm" onclick="deleteChecklist('${c.id}')">Delete</button>
+      </div></td>
+    </tr>`).join('');
+}
+function deleteChecklist(id){if(!confirm('Delete this checklist?'))return;DB.set('checklists',DB.checklists().filter(c=>c.id!==id));renderChecklists();}
+
+// ══════════════════════════════════════════════════════════════
+// BUILDER
+// ══════════════════════════════════════════════════════════════
+const THEME_COLORS=['#00e5a0','#4e9eff','#ff6b35','#a855f7','#ff4757','#fbbf24','#ec4899','#06b6d4'];
+let builderBlocks=[];
+let builderMeta={id:'',title:'',desc:'',type:'custom',color:'#00e5a0',cover:''};
+let editingQid=null;
+let iconCallback=null;
+
+const ALL_ICONS=['🍽️','🍳','🥘','🔥','❄️','🌡️','🧊','💨','🚪','🧹','🧽','🪣','🚰','🗑️','🐭','🚨','⭐','📝','📸','📋','✅','❌','⚠️','🏷️','📅','⏰','🔒','🔑','💡','🔌','🧴','🧪','🥗','🥩','🍖','🥦','🧄','🧅','🥚','🧀','🥛','🍞','🥐','🍕','🍜','🍛','🌮','🥪','🥙','🫕','🫙','📦','🏪','🏬','👨‍🍳','👩‍🍳','👤','👥','✍️','📊','📈','🔍','🔎','📌','📍','💬','🗂️','📁','💾','🖨️','🖥️','📱','⚙️','🛠️','🔧','🔨','⚡','🌊','💧','🌿','🍃','🌱','♻️','🏆','🎯','💯','🆗','✔️','🔴','🟡','🟢'];
+
+function openBuilder(clId){
+  builderBlocks=[];
+  builderMeta={id:'',title:'',desc:'',type:'custom',color:'#00e5a0',cover:''};
+  if(clId){
+    const cl=DB.checklists().find(x=>x.id===clId);
+    if(cl){
+      builderMeta={id:cl.id,title:cl.name,desc:cl.desc||'',type:cl.type,color:cl.color||'#00e5a0',cover:cl.cover||''};
+      builderBlocks=JSON.parse(JSON.stringify(cl.blocks||[]));
+    }
+  }
+  document.getElementById('bl-title').value=builderMeta.title;
+  document.getElementById('bl-desc').value=builderMeta.desc;
+  document.getElementById('bl-type').value=builderMeta.type;
+  // color swatches
+  const sw=document.getElementById('color-swatches');
+  sw.innerHTML=THEME_COLORS.map(c=>`<div class="color-swatch ${c===builderMeta.color?'selected':''}" style="background:${c}" onclick="selectColor('${c}')" title="${c}"></div>`).join('');
+  // cover
+  if(builderMeta.cover){document.getElementById('cover-preview').src=builderMeta.cover;document.getElementById('cover-preview').classList.remove('hidden');document.getElementById('cover-remove').classList.remove('hidden');}
+  else{document.getElementById('cover-preview').classList.add('hidden');document.getElementById('cover-remove').classList.add('hidden');}
+  document.getElementById('builder-title-label').textContent=builderMeta.title||'Form builder';
+  document.getElementById('builder-screen').classList.remove('hidden');
+  switchBuilderTab('design');
+  renderQList();
+  renderPreview();
+}
+function closeBuilder(){document.getElementById('builder-screen').classList.add('hidden');}
+function switchBuilderTab(tab){
+  document.getElementById('builder-design').style.display=tab==='design'?'flex':'none';
+  document.getElementById('builder-design').style.flexDirection='column';
+  document.getElementById('btab-design').className='btn-'+(tab==='design'?'primary':'secondary')+' btn-sm';
+  document.getElementById('btab-preview').className='btn-'+(tab==='preview'?'primary':'secondary')+' btn-sm';
+  if(tab==='preview')renderPreview();
+}
+function selectColor(c){builderMeta.color=c;document.querySelectorAll('.color-swatch').forEach(s=>{s.classList.toggle('selected',s.style.background===c||s.getAttribute('onclick').includes(c));});renderPreview();}
+function handleCoverUpload(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{builderMeta.cover=ev.target.result;document.getElementById('cover-preview').src=ev.target.result;document.getElementById('cover-preview').classList.remove('hidden');document.getElementById('cover-remove').classList.remove('hidden');renderPreview();};
+  reader.readAsDataURL(file);
+}
+function removeCover(){builderMeta.cover='';document.getElementById('cover-preview').classList.add('hidden');document.getElementById('cover-remove').classList.add('hidden');document.getElementById('cover-upload').value='';renderPreview();}
+function updatePreviewTitle(){builderMeta.title=document.getElementById('bl-title').value;builderMeta.desc=document.getElementById('bl-desc').value;document.getElementById('builder-title-label').textContent=builderMeta.title||'Form builder';renderPreview();}
+
+// Blocks management
+function newId(){return 'b'+Date.now()+Math.random().toString(36).slice(2,6)}
+function addQuestion(type){
+  const icons={yesno:'☑️',rating:'⭐',temperature:'🌡️',text:'📝',photo:'📷',procheck:'🏆',multiple:'🔘'};
+  const labels={yesno:'New yes/no question',rating:'Rate this item',temperature:'Record temperature',text:'Enter your answer',photo:'Upload a photo',procheck:'Professional standard completed?',multiple:'Select an option'};
+  const descs={procheck:'Confirm the item meets the required standard and add a clear photo as proof.'};
+  const opts=type==='multiple'?['Option A','Option B','Option C']:[];
+  builderBlocks.push({kind:'question',id:newId(),icon:icons[type],label:labels[type],desc:descs[type]||'',type,required:true,options:opts,evidenceRequired:type==='procheck'});
+  renderQList();renderPreview();
+}
+function addSection(){
+  builderBlocks.push({kind:'section',id:newId(),icon:'📂',title:'New section',desc:''});
+  renderQList();renderPreview();
+}
+function deleteBlock(id){builderBlocks=builderBlocks.filter(b=>b.id!==id);renderQList();renderPreview();}
+function moveBlock(id,dir){
+  const i=builderBlocks.findIndex(b=>b.id===id);const ni=i+dir;
+  if(ni<0||ni>=builderBlocks.length)return;
+  [builderBlocks[i],builderBlocks[ni]]=[builderBlocks[ni],builderBlocks[i]];
+  renderQList();renderPreview();
+}
+
+function renderQList(){
+  const el=document.getElementById('qlist');
+  if(!builderBlocks.length){el.innerHTML='<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px">Add questions below ↓</div>';return}
+  el.innerHTML=builderBlocks.map((b,i)=>{
+    if(b.kind==='section') return`
+      <div class="sblock">
+        <span class="sblock-icon" style="cursor:pointer" onclick="openIconPicker('${b.id}')">${b.icon}</span>
+        <div class="sblock-text"><div class="st">${b.title}</div><div class="ss">${b.desc||'Section'}</div></div>
+        <div class="sblock-actions">
+          <button onclick="moveBlock('${b.id}',-1)" title="Up">↑</button>
+          <button onclick="moveBlock('${b.id}',1)" title="Down">↓</button>
+          <button onclick="openEditQ('${b.id}')" title="Edit">✏️</button>
+          <button onclick="deleteBlock('${b.id}')" title="Delete">🗑️</button>
+        </div>
+      </div>`;
+    return`
+      <div class="qblock">
+        <div class="qblock-head">
+          <span class="qblock-icon" style="cursor:pointer" title="Change icon" onclick="openIconPicker('${b.id}')">${b.icon}</span>
+          <span class="qblock-title">${b.label}</span>
+          <span class="qblock-type">${b.type}</span>
+          <div class="qblock-actions">
+            <button onclick="moveBlock('${b.id}',-1)" title="Up">↑</button>
+            <button onclick="moveBlock('${b.id}',1)" title="Down">↓</button>
+            <button onclick="openEditQ('${b.id}')" title="Edit">✏️</button>
+            <button onclick="deleteBlock('${b.id}')" title="Delete">🗑️</button>
+          </div>
+        </div>
+        ${b.desc?`<div class="qblock-desc">${b.desc}</div>`:''}
+      </div>`;
+  }).join('');
+}
+
+// Edit question modal
+function openEditQ(id){
+  const b=builderBlocks.find(x=>x.id===id);if(!b)return;
+  editingQid=id;
+  const isSection=b.kind==='section';
+  document.getElementById('eq-title').textContent=isSection?'Edit section':'Edit question';
+  let html=`<div class="form-group"><label>${isSection?'Section title':'Question'}</label><input id="eq-label" value="${b.title||b.label}"></div>
+    <div class="form-group"><label>Description / hint</label><input id="eq-desc" value="${b.desc||''}"></div>`;
+  if(!isSection){
+    html+=`<div class="form-group"><label>Required?</label><select id="eq-required"><option value="true" ${b.required?'selected':''}>Yes – required</option><option value="false" ${!b.required?'selected':''}>No – optional</option></select></div>`;
+    if(b.type==='procheck'){
+      html+=`<div class="form-group"><label>Photo proof</label><select id="eq-evidence"><option value="true" ${b.evidenceRequired!==false?'selected':''}>Required / expected</option><option value="false" ${b.evidenceRequired===false?'selected':''}>Optional</option></select></div>`;
+    }
+    if(b.type==='multiple'){
+      html+=`<div class="form-group"><label>Options (one per line)</label><textarea id="eq-options" rows="5">${(b.options||[]).join('\n')}</textarea></div>`;
+    }
+  }
+  document.getElementById('eq-body').innerHTML=html;
+  openModal('eq-modal');
+}
+function saveQuestion(){
+  const b=builderBlocks.find(x=>x.id===editingQid);if(!b)return;
+  const lbl=document.getElementById('eq-label').value.trim();
+  const desc=document.getElementById('eq-desc').value.trim();
+  if(b.kind==='section'){b.title=lbl||b.title;b.desc=desc;}
+  else{
+    b.label=lbl||b.label;b.desc=desc;
+    const rq=document.getElementById('eq-required');if(rq)b.required=rq.value==='true';
+    const ev=document.getElementById('eq-evidence');if(ev)b.evidenceRequired=ev.value==='true';
+    const op=document.getElementById('eq-options');if(op)b.options=op.value.split('\n').map(s=>s.trim()).filter(Boolean);
+  }
+  closeModal('eq-modal');renderQList();renderPreview();
+}
+
+// Icon picker
+function openIconPicker(blockId){
+  iconCallback=blockId;
+  renderIconGrid('');
+  document.getElementById('icon-search').value='';
+  openModal('icon-modal');
+}
+function renderIconGrid(filter){
+  const icons=filter?ALL_ICONS.filter(i=>i.includes(filter)):ALL_ICONS;
+  const b=builderBlocks.find(x=>x.id===iconCallback);
+  const sel=b?(b.icon||''):'';
+  document.getElementById('icon-grid').innerHTML=icons.map(ic=>`<div class="icon-cell ${ic===sel?'selected':''}" onclick="selectIcon('${ic}')">${ic}</div>`).join('');
+}
+function filterIcons(v){renderIconGrid(v)}
+function selectIcon(ic){
+  const b=builderBlocks.find(x=>x.id===iconCallback);if(b){b.icon=ic;}
+  closeModal('icon-modal');renderQList();renderPreview();
+}
+
+// ── SAVE BUILDER ──
+function saveBuilderForm(){
+  const title=document.getElementById('bl-title').value.trim();
+  const desc=document.getElementById('bl-desc').value.trim();
+  const type=document.getElementById('bl-type').value;
+  if(!title){alert('Please enter a checklist title.');return}
+  if(!builderBlocks.filter(b=>b.kind==='question').length){alert('Add at least one question.');return}
+  const cls=DB.checklists();
+  const id=builderMeta.id||('cl'+Date.now());
+  const obj={id,name:title,desc,type,color:builderMeta.color,cover:builderMeta.cover,blocks:builderBlocks};
+  const idx=cls.findIndex(c=>c.id===id);
+  if(idx>=0)cls[idx]=obj;else cls.push(obj);
+  DB.set('checklists',cls);
+  closeBuilder();renderChecklists();
+  alert('Checklist saved!');
+}
+
+// ══════════════════════════════════════════════════════════════
+// PREVIEW RENDERER (shared between builder preview + fill form)
+// ══════════════════════════════════════════════════════════════
+function renderFormHTML(cl,fillMode){
+  const color=cl.color||'#00e5a0';
+  let html='';
+  // Cover
+  if(cl.cover){
+    html+=`<div class="gform-cover" style="min-height:180px">
+      <img class="gform-cover-img" src="${cl.cover}">
+      <div class="gform-cover-overlay"></div>
+      <div class="gform-cover-bar"><div style="font-size:28px font-weight:700;color:#fff;text-shadow:0 2px 8px #0008">${cl.name}</div></div>
+    </div>`;
+  }
+  // Header card
+  html+=`<div class="gform-header-card" style="border-top-color:${color}">
+    <div class="gform-title">${cl.name}</div>
+    ${cl.desc?`<div class="gform-desc">${cl.desc}</div>`:''}
+    <div class="gform-info-row">
+      <div class="gform-info-chip">📅 <span id="gf-date-display">${new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</span></div>
+      <div class="gform-info-chip">⏰ <span id="gf-time-display">${new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}</span></div>
+      ${fillMode?`<div class="gform-info-chip">👤 ${currentUser.name}</div>`:''}
+    </div>
+    ${fillMode?`<div style="margin-top:14px"><label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px">Shift</label>
+      <select id="gf-shift" style="max-width:240px"><option>Morning</option><option>Afternoon</option><option>Evening</option><option>Night</option><option>G Shift (General)</option></select></div>`:''}
+  </div>`;
+  // Blocks
+  (cl.blocks||[]).forEach((b,i)=>{
+    if(b.kind==='section'){
+      html+=`<div class="gform-section">
+        <div class="gform-section-icon">${b.icon}</div>
+        <div class="gform-section-text"><div class="gst">${b.title}</div>${b.desc?`<div class="gss">${b.desc}</div>`:''}</div>
+      </div>`;
+    } else {
+      const fid='gf_'+b.id;
+      let answerHtml='';
+      if(b.type==='yesno'){
+        answerHtml=`<div class="gform-yn">
+          <div class="gform-yn-btn" id="${fid}_yes" onclick="selectYN('${fid}','yes','${color}')">✅ Yes</div>
+          <div class="gform-yn-btn" id="${fid}_no" onclick="selectYN('${fid}','no','${color}')">❌ No</div>
+        </div>`;
+      } else if(b.type==='procheck'){
+        answerHtml=`<div class="gform-yn">
+          <div class="gform-yn-btn" id="${fid}_yes" onclick="selectYN('${fid}','yes','${color}')">✅ Meets standard</div>
+          <div class="gform-yn-btn" id="${fid}_no" onclick="selectYN('${fid}','no','${color}')">❌ Needs correction</div>
+        </div>
+        <div style="margin-top:12px">
+          ${fillMode?`<div class="gform-photo-upload" onclick="document.getElementById('${fid}_file').click()">
+            <div style="font-size:28px;margin-bottom:6px">📸</div>
+            <div style="font-size:13px;color:var(--muted)">${b.evidenceRequired===false?'Optional proof photo':'Add proof photo'}</div>
+            <input type="file" id="${fid}_file" accept="image/*" capture="environment" style="display:none" onchange="handlePhotoUpload(this,'${fid}')">
+          </div><div class="gform-photo-preview" id="${fid}_preview"></div>`:
+          `<div style="font-size:13px;color:var(--muted);padding:10px 14px;background:var(--surface);border-radius:8px;border:1px dashed var(--border)">📷 ${b.evidenceRequired===false?'Optional proof photo':'Proof photo requested'}</div>`}
+        </div>`;
+      } else if(b.type==='rating'){
+        answerHtml=`<div class="gform-rating" id="${fid}_stars">${[1,2,3,4,5].map(n=>`<span class="gform-star" onclick="selectRating('${fid}',${n})" data-val="${n}">★</span>`).join('')}</div>`;
+      } else if(b.type==='temperature'){
+        answerHtml=`<div class="gform-temp-input"><input type="number" id="${fid}_val" placeholder="e.g. 3.5" step="0.1" style="max-width:140px"><span class="gform-temp-unit">°C</span></div>`;
+      } else if(b.type==='text'){
+        answerHtml=`<textarea id="${fid}_val" rows="2" placeholder="Type your answer…" style="resize:vertical"></textarea>`;
+      } else if(b.type==='photo'){
+        answerHtml=fillMode?`<div class="gform-photo-upload" onclick="document.getElementById('${fid}_file').click()">
+          <div style="font-size:28px;margin-bottom:6px">📸</div>
+          <div style="font-size:13px;color:var(--muted)">Tap to take photo or upload</div>
+          <input type="file" id="${fid}_file" accept="image/*" capture="environment" style="display:none" onchange="handlePhotoUpload(this,'${fid}')">
+        </div><div class="gform-photo-preview" id="${fid}_preview"></div>`:
+        `<div style="font-size:13px;color:var(--muted);padding:10px 14px;background:var(--surface);border-radius:8px;border:1px dashed var(--border)">📷 Photo upload</div>`;
+      } else if(b.type==='multiple'){
+        const opts=b.options||[];
+        answerHtml=`<div class="gform-options">${opts.map((o,oi)=>`
+          <label class="gform-option" id="${fid}_opt${oi}" onclick="selectOption('${fid}',${oi},${opts.length})">
+            <input type="radio" name="${fid}" value="${o}" style="width:18px;height:18px;accent-color:${color}"> ${o}
+          </label>`).join('')}</div>`;
+      }
+      html+=`<div class="gform-q">
+        <div class="gform-q-header">
+          <div class="gform-q-icon">${b.icon}</div>
+          <div class="gform-q-title">${b.label}${b.required?`<span class="gform-q-required">*</span>`:''}</div>
+        </div>
+        ${b.desc?`<div class="gform-q-desc">${b.desc}</div>`:''}
+        ${answerHtml}
+      </div>`;
+    }
+  });
+  if(fillMode){
+    html+=`<div class="gform-q"><div style="font-weight:600;margin-bottom:10px">📝 General remarks</div>
+      <textarea id="gf_remarks" rows="3" placeholder="Any issues, observations, or notes…" style="resize:vertical"></textarea>
+    </div>`;
+    html+=`<button class="gform-submit-btn" style="background:${color}" onclick="submitForm()">Submit checklist ✓</button>`;
+  }
+  return html;
+}
+
+function renderPreview(){
+  const cl={
+    id:builderMeta.id,name:document.getElementById('bl-title').value||'Untitled form',
+    desc:document.getElementById('bl-desc').value,type:document.getElementById('bl-type').value,
+    color:builderMeta.color,cover:builderMeta.cover,blocks:builderBlocks
+  };
+  document.getElementById('gform-preview').innerHTML=renderFormHTML(cl,false);
+  // apply color accent
+  document.querySelectorAll('.gform-header-card').forEach(el=>el.style.borderTopColor=builderMeta.color);
+}
+
+// Interactive answer helpers (preview + fill)
+function selectYN(fid,val,color){
+  const yb=document.getElementById(fid+'_yes');
+  const nb=document.getElementById(fid+'_no');
+  if(!yb||!nb)return;
+  yb.className='gform-yn-btn'+(val==='yes'?' selected-yes':'');
+  nb.className='gform-yn-btn'+(val==='no'?' selected-no':'');
+  yb.dataset.selected=val==='yes'?'yes':'';
+  nb.dataset.selected=val==='no'?'no':'';
+}
+function selectRating(fid,val){
+  const stars=document.querySelectorAll(`#${fid}_stars .gform-star`);
+  stars.forEach(s=>{s.classList.toggle('active',parseInt(s.dataset.val)<=val);s.dataset.rating=val;});
+}
+function selectOption(fid,idx,total){
+  for(let i=0;i<total;i++){const el=document.getElementById(`${fid}_opt${i}`);if(el)el.classList.toggle('selected',i===idx);}
+}
+function handlePhotoUpload(input,fid){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const preview=document.getElementById(fid+'_preview');
+    if(preview){const img=document.createElement('img');img.src=ev.target.result;img.className='gform-photo-thumb';preview.appendChild(img);}
+  };
+  reader.readAsDataURL(file);
+}
+
+// ══════════════════════════════════════════════════════════════
+// FILL FORM (employee)
+// ══════════════════════════════════════════════════════════════
+let fillingCl=null;
+function openFillScreen(clId){
+  const cl=DB.checklists().find(x=>x.id===clId);if(!cl)return;
+  fillingCl=cl;
+  document.getElementById('fill-screen-title').textContent=cl.name;
+  document.getElementById('gform-fill').innerHTML=renderFormHTML(cl,true);
+  document.getElementById('fill-screen').classList.remove('hidden');
+}
+function closeFillScreen(){document.getElementById('fill-screen').classList.add('hidden');fillingCl=null;}
+
+function submitForm(){
+  if(!fillingCl)return;
+  const answers={};
+  let score=0,total=0;
+  (fillingCl.blocks||[]).forEach(b=>{
+    if(b.kind!=='question')return;
+    const fid='gf_'+b.id;
+    let val=null;
+    if(b.type==='yesno'){
+      const yb=document.getElementById(fid+'_yes');
+      const nb=document.getElementById(fid+'_no');
+      if(yb&&yb.classList.contains('selected-yes'))val='yes';
+      else if(nb&&nb.classList.contains('selected-no'))val='no';
+      if(b.required){total++;if(val==='yes')score++;}
+    } else if(b.type==='procheck'){
+      const yb=document.getElementById(fid+'_yes');
+      const nb=document.getElementById(fid+'_no');
+      const prev=document.getElementById(fid+'_preview');
+      const photos=prev&&prev.children.length?`${prev.children.length} photo(s)`:'no photo';
+      if(yb&&yb.classList.contains('selected-yes'))val=`Meets standard · ${photos}`;
+      else if(nb&&nb.classList.contains('selected-no'))val=`Needs correction · ${photos}`;
+      if(b.required){total++;if(yb&&yb.classList.contains('selected-yes'))score++;}
+    } else if(b.type==='rating'){
+      const stars=document.querySelectorAll(`#${fid}_stars .gform-star.active`);
+      val=stars.length||null;
+    } else if(b.type==='temperature'||b.type==='text'){
+      val=document.getElementById(fid+'_val')?.value||null;
+    } else if(b.type==='multiple'){
+      const checked=document.querySelector(`input[name="${fid}"]:checked`);
+      val=checked?checked.value:null;
+    } else if(b.type==='photo'){
+      const prev=document.getElementById(fid+'_preview');
+      val=prev&&prev.children.length?`${prev.children.length} photo(s)`:null;
+    }
+    answers[b.label]={type:b.type,value:val,icon:b.icon};
+  });
+  const remarks=document.getElementById('gf_remarks')?.value||'';
+  const shift=document.getElementById('gf-shift')?.value||'';
+  const subs=DB.submissions();
+  subs.push({
+    id:'s'+Date.now(),clId:fillingCl.id,clName:fillingCl.name,clType:fillingCl.type,
+    color:fillingCl.color,userId:currentUser.id,userName:currentUser.name,
+    date:new Date().toISOString().slice(0,10),time:new Date().toTimeString().slice(0,5),
+    shift,answers,remarks,score,total,submittedAt:new Date().toISOString()
+  });
+  DB.set('submissions',subs);
+  closeFillScreen();renderEmpDash();renderMyHistory();
+  if(currentUser.role==='admin'){renderDash();renderAdminSubmissions();}
+  alert('✅ Checklist submitted successfully!');
+}
+
+// ══════════════════════════════════════════════════════════════
+// SUBMISSION DISPLAY
+// ══════════════════════════════════════════════════════════════
+function submissionCard(s,showUser){
+  const pct=s.total?Math.round(s.score/s.total*100):null;
+  const color=s.color||'#00e5a0';
+  const itemsHtml=Object.entries(s.answers||{}).map(([k,v])=>{
+    const icon=v.icon||'📋';
+    let badge='';
+    if(v.type==='yesno'){
+      const isYes=v.value==='yes';
+      badge=`<div class="tick ${isYes?'yes':'no'}">${isYes?'✓':'✗'}</div>`;
+    } else if(v.value){
+      badge=`<div style="font-size:11px;font-weight:700;color:${color};background:${color}1a;padding:2px 8px;border-radius:8px;white-space:nowrap">${v.type==='rating'?'★'.repeat(v.value):v.value}</div>`;
+    } else {
+      badge=`<div class="tick" style="background:var(--border);color:var(--muted)">—</div>`;
+    }
+    return`<div class="sub-item"><span style="font-size:16px;flex-shrink:0">${icon}</span><span class="sub-label">${k}</span>${badge}</div>`;
+  }).join('');
+  return`<div class="sub-card">
+    <div class="sub-head" style="border-top:3px solid ${color}">
+      <div><h3>${s.clName}</h3><div style="font-size:12px;color:var(--muted);margin-top:2px">${s.date} · ${s.time}${s.shift?' · '+s.shift:''}${showUser?' · '+s.userName:''}</div></div>
+      ${typeTag(s.clType)}
+    </div>
+    <div class="sub-body">
+      <div class="sub-grid">${itemsHtml}</div>
+      ${s.remarks?`<div style="margin-top:10px;padding:10px 14px;background:var(--surface);border-radius:8px;border:1px solid var(--border);font-size:13px"><span style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px">Remarks</span><br>${s.remarks}</div>`:''}
+      ${pct!==null?`<div class="progress-wrap">
+        <span style="font-size:12px;color:var(--muted)">Yes/No score</span>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${color}"></div></div>
+        <span style="font-size:13px;font-weight:700;color:${color}">${s.score}/${s.total}</span>
+      </div>`:''}
+    </div>
+  </div>`;
+}
+function renderAdminSubmissions(){
+  const subs=DB.submissions().slice().reverse();
+  const el=document.getElementById('submissions-list');
+  el.innerHTML=subs.length?subs.map(s=>submissionCard(s,true)).join(''):
+    '<div class="empty-state"><div class="es-icon">📋</div><p>No submissions yet</p></div>';
+}
+function renderMyHistory(){
+  const subs=DB.submissions().filter(s=>s.userId===currentUser.id).slice().reverse();
+  const el=document.getElementById('my-history-list');
+  el.innerHTML=subs.length?subs.map(s=>submissionCard(s,false)).join(''):
+    '<div class="empty-state"><div class="es-icon">📜</div><p>No submissions yet</p></div>';
+}
+
+// ══════════════════════════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════════════════════════
+function renderDash(){
+  const subs=DB.submissions();const users=DB.users().filter(u=>u.role==='employee');const cls=DB.checklists();
+  document.getElementById('dash-stats').innerHTML=`
+    <div class="stat"><div class="sl">Employees</div><div class="sv" style="color:var(--accent3)">${users.length}</div></div>
+    <div class="stat"><div class="sl">Checklists</div><div class="sv" style="color:var(--accent2)">${cls.length}</div></div>
+    <div class="stat"><div class="sl">Submissions</div><div class="sv" style="color:var(--accent)">${subs.length}</div></div>
+    <div class="stat"><div class="sl">Today</div><div class="sv">${subs.filter(s=>s.date===new Date().toISOString().slice(0,10)).length}</div></div>`;
+  const tbody=document.getElementById('dash-recent');
+  const recent=subs.slice(-10).reverse();
+  tbody.innerHTML=recent.length?recent.map(s=>`<tr><td>${s.userName}</td><td>${typeTag(s.clType)} ${s.clName}</td><td style="color:var(--muted)">${s.date} ${s.time}</td><td style="font-weight:700;color:${s.color||'var(--accent)'}">${s.score}/${s.total}</td></tr>`).join('')
+    :'<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px">No submissions yet</td></tr>';
+}
+
+// ══════════════════════════════════════════════════════════════
+// EMPLOYEE DASH
+// ══════════════════════════════════════════════════════════════
+function renderEmpDash(){
+  const cls=DB.checklists();const grid=document.getElementById('emp-checklists-grid');
+  if(!cls.length){grid.innerHTML='<div class="empty-state"><div class="es-icon">📋</div><p>No checklists assigned yet.</p></div>';return}
+  grid.innerHTML=cls.map(c=>{
+    const color=c.color||'#00e5a0';
+    const qCount=(c.blocks||[]).filter(b=>b.kind==='question').length;
+    const coverStyle=c.cover?`background-image:url(${c.cover});background-size:cover;background-position:center;`:'';
+    return`<div style="background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;cursor:pointer;transition:border-color .2s,transform .15s" onmouseover="this.style.borderColor='${color}';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform=''" onclick="openFillScreen('${c.id}')">
+      <div style="height:80px;${coverStyle}background-color:${color}1a;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--border)">
+        ${c.cover?'':`<span style="font-size:36px">${{temp:'🌡️',closing:'🔒',cooking:'🍳',custom:'📋'}[c.type]||'📋'}</span>`}
+      </div>
+      <div style="padding:16px">
+        <div style="font-weight:700;font-size:15px;margin-bottom:4px">${c.name}</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:12px">${qCount} questions${c.desc?' · '+c.desc.slice(0,40)+'…':''}</div>
+        <div style="background:${color}15;color:${color};border:1px solid ${color}33;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;text-align:center">Fill out →</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+</script>
+
+
+</body><div id="codex-browser-sidebar-comments-root" style="position: fixed; inset: 0px; pointer-events: none; z-index: 2147483647;"></div></html>

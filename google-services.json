@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "208001941540",
+    "project_id": "kitchenpro-1de76",
+    "storage_bucket": "kitchenpro-1de76.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:208001941540:android:49559584ff0348ce3a18b1",
+        "android_client_info": {
+          "package_name": "KitchenPro.com"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCkHJLL67wMwN0V3SZLSPq5FGa60bn5_6M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
